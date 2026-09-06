@@ -84,7 +84,7 @@ services:
             en_US: Auto-generated one-time database setup script (creates the app's runtime role) — do not modify.
 
   migrate:
-    image: ghcr.io/raktim94/rechvix-server:0.2.0
+    image: ghcr.io/raktim94/rechvix-server:0.2.1
     container_name: rechvix-migrate
     command: ["-migrate"]
     restart: "no"
@@ -99,7 +99,7 @@ services:
       envs: []
 
   app:
-    image: ghcr.io/raktim94/rechvix-server:0.2.0
+    image: ghcr.io/raktim94/rechvix-server:0.2.1
     container_name: rechvix-app
     hostname: rechvix-app
     restart: unless-stopped
@@ -131,7 +131,7 @@ services:
           protocol: tcp
 
   worker:
-    image: ghcr.io/raktim94/rechvix-worker:0.2.0
+    image: ghcr.io/raktim94/rechvix-worker:0.2.1
     container_name: rechvix-worker
     hostname: rechvix-worker
     restart: unless-stopped
@@ -201,10 +201,17 @@ x-casaos:
   index: /
   scheme: http
   port_map: "8090"
-  version: "0.2.0"
-  update_at: "2026-09-06"
+  version: "0.2.1"
+  update_at: "2026-09-07"
   release_notes:
     en_US: |-
+      0.2.1 (2026-09-07):
+      Fixed a real install-breaking bug: postgres-init generated the
+      billing_app database role with a garbage password (a shell escaping
+      bug, not just a CasaOS quirk), so the app and worker containers
+      crash-looped on every fresh install. Also fixed the icon/screenshot
+      links, which pointed at an unmerged upstream path and 404ed.
+
       0.2.0 (2026-09-06):
       Owner/Admin can now add teammates from Settings > Team — Bootstrap
       previously only ever created the single first-run owner, with no way
