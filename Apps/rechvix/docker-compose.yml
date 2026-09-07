@@ -206,6 +206,14 @@ x-casaos:
   update_at: "2026-09-07"
   release_notes:
     en_US: |-
+      0.3.1 (2026-09-07):
+      Fixed two real bugs found while testing 0.3.0 live: the Unit
+      dropdown on the new-product form was always empty (frontend/backend
+      field-name mismatch), which made it impossible to ever pick a
+      previously-created unit and forced creating a new throwaway one
+      every time; and the Category/Brand "add new" inputs overlapped
+      illegibly with each other on the same form.
+
       0.3.0 (2026-09-07):
       Ships 15 commits of features that had been merged to the source
       repo but never actually released: a real per-product inventory
