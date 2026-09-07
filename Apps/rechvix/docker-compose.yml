@@ -84,7 +84,7 @@ services:
             en_US: Auto-generated one-time database setup script (creates the app's runtime role) — do not modify.
 
   migrate:
-    image: ghcr.io/raktim94/rechvix-server:0.3.0
+    image: ghcr.io/raktim94/rechvix-server:0.3.1
     container_name: rechvix-migrate
     command: ["-migrate"]
     restart: "no"
@@ -99,7 +99,7 @@ services:
       envs: []
 
   app:
-    image: ghcr.io/raktim94/rechvix-server:0.3.0
+    image: ghcr.io/raktim94/rechvix-server:0.3.1
     container_name: rechvix-app
     hostname: rechvix-app
     restart: unless-stopped
@@ -110,6 +110,7 @@ services:
       HTTP_PORT: "8080"
       DATABASE_DSN: "postgres://billing_app:${BILLING_APP_PASSWORD}@rechvix-postgres:5432/billing?sslmode=disable"
       DATABASE_AUTO_MIGRATE: "false"
+      BACKUP_DATABASE_DSN: "postgres://billing_migrator:${POSTGRES_PASSWORD}@rechvix-postgres:5432/billing?sslmode=disable"
       SESSION_COOKIE_SECURE: "false"
       AEAD_ENCRYPTION_KEY: "${AEAD_ENCRYPTION_KEY}"
       ENABLE_BOOTSTRAP: "true"
@@ -131,7 +132,7 @@ services:
           protocol: tcp
 
   worker:
-    image: ghcr.io/raktim94/rechvix-worker:0.3.0
+    image: ghcr.io/raktim94/rechvix-worker:0.3.1
     container_name: rechvix-worker
     hostname: rechvix-worker
     restart: unless-stopped
@@ -201,7 +202,7 @@ x-casaos:
   index: /
   scheme: http
   port_map: "8090"
-  version: "0.3.0"
+  version: "0.3.1"
   update_at: "2026-09-07"
   release_notes:
     en_US: |-
