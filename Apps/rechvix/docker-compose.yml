@@ -84,7 +84,7 @@ services:
             en_US: Auto-generated one-time database setup script (creates the app's runtime role) — do not modify.
 
   migrate:
-    image: ghcr.io/raktim94/rechvix-server:0.2.2
+    image: ghcr.io/raktim94/rechvix-server:0.3.0
     container_name: rechvix-migrate
     command: ["-migrate"]
     restart: "no"
@@ -99,7 +99,7 @@ services:
       envs: []
 
   app:
-    image: ghcr.io/raktim94/rechvix-server:0.2.2
+    image: ghcr.io/raktim94/rechvix-server:0.3.0
     container_name: rechvix-app
     hostname: rechvix-app
     restart: unless-stopped
@@ -131,7 +131,7 @@ services:
           protocol: tcp
 
   worker:
-    image: ghcr.io/raktim94/rechvix-worker:0.2.2
+    image: ghcr.io/raktim94/rechvix-worker:0.3.0
     container_name: rechvix-worker
     hostname: rechvix-worker
     restart: unless-stopped
@@ -201,10 +201,21 @@ x-casaos:
   index: /
   scheme: http
   port_map: "8090"
-  version: "0.2.2"
+  version: "0.3.0"
   update_at: "2026-09-07"
   release_notes:
     en_US: |-
+      0.3.0 (2026-09-07):
+      Ships 15 commits of features that had been merged to the source
+      repo but never actually released: a real per-product inventory
+      view (stock, movement history, manual adjustments — not just two
+      report tables), catalogue category/brand selection, a full
+      contact detail page (GSTIN, address, ledger, record payment),
+      CSV/Excel import for products and contacts, global keyboard
+      shortcuts, invoice branding and WhatsApp sharing, encrypted
+      backup/restore, and search/filtering on the sales and purchases
+      lists.
+
       0.2.2 (2026-09-07):
       Sign-in page now shows a persistent "New to Rechvix? Set up your
       business" link when first-run setup is still open, instead of
