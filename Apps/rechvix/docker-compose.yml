@@ -84,7 +84,7 @@ services:
             en_US: Auto-generated one-time database setup script (creates the app's runtime role) — do not modify.
 
   migrate:
-    image: ghcr.io/raktim94/rechvix-server:0.5.0
+    image: ghcr.io/raktim94/rechvix-server:0.6.0
     container_name: rechvix-migrate
     command: ["-migrate"]
     restart: "no"
@@ -99,7 +99,7 @@ services:
       envs: []
 
   app:
-    image: ghcr.io/raktim94/rechvix-server:0.5.0
+    image: ghcr.io/raktim94/rechvix-server:0.6.0
     container_name: rechvix-app
     hostname: rechvix-app
     restart: unless-stopped
@@ -132,7 +132,7 @@ services:
           protocol: tcp
 
   worker:
-    image: ghcr.io/raktim94/rechvix-worker:0.5.0
+    image: ghcr.io/raktim94/rechvix-worker:0.6.0
     container_name: rechvix-worker
     hostname: rechvix-worker
     restart: unless-stopped
@@ -202,10 +202,19 @@ x-casaos:
   index: /
   scheme: http
   port_map: "8090"
-  version: "0.5.0"
+  version: "0.6.0"
   update_at: "2026-09-08"
   release_notes:
     en_US: |-
+      0.6.0 (2026-09-08):
+      Added sales returns and credit notes — a customer returning an
+      item, or a price correction after the fact, now has a real path,
+      with partial-quantity returns handled correctly (only the returned
+      units go back into stock). Receipts and payments can now be tied
+      to a real bank account instead of always silently posting to cash
+      regardless of the payment method picked. A WhatsApp share link can
+      now actually be revoked, not just claimed to be.
+
       0.5.0 (2026-09-08):
       Scanning a barcode at the counter now actually finds the product —
       the billing screen has always said "scan a barcode" but the search
