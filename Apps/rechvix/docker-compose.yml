@@ -84,7 +84,7 @@ services:
             en_US: Auto-generated one-time database setup script (creates the app's runtime role) — do not modify.
 
   migrate:
-    image: ghcr.io/raktim94/rechvix-server:0.7.0
+    image: ghcr.io/raktim94/rechvix-server:0.8.0
     container_name: rechvix-migrate
     command: ["-migrate"]
     restart: "no"
@@ -99,7 +99,7 @@ services:
       envs: []
 
   app:
-    image: ghcr.io/raktim94/rechvix-server:0.7.0
+    image: ghcr.io/raktim94/rechvix-server:0.8.0
     container_name: rechvix-app
     hostname: rechvix-app
     restart: unless-stopped
@@ -132,7 +132,7 @@ services:
           protocol: tcp
 
   worker:
-    image: ghcr.io/raktim94/rechvix-worker:0.7.0
+    image: ghcr.io/raktim94/rechvix-worker:0.8.0
     container_name: rechvix-worker
     hostname: rechvix-worker
     restart: unless-stopped
@@ -202,10 +202,16 @@ x-casaos:
   index: /
   scheme: http
   port_map: "8090"
-  version: "0.7.0"
+  version: "0.8.0"
   update_at: "2026-09-08"
   release_notes:
     en_US: |-
+      0.8.0 (2026-09-08):
+      Cancel/void now works on the purchases side too, mirroring the
+      invoice-cancellation added in 0.7.0 — a mis-entered goods receipt,
+      bill, return, or debit note can be voided, with stock and the
+      supplier ledger reversed exactly.
+
       0.7.0 (2026-09-08):
       A mis-billed finalized invoice can now be cancelled/voided outright
       — stock is put back and the sale is reversed out of the books with
