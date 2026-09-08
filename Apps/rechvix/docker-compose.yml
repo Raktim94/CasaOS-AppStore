@@ -84,7 +84,7 @@ services:
             en_US: Auto-generated one-time database setup script (creates the app's runtime role) — do not modify.
 
   migrate:
-    image: ghcr.io/raktim94/rechvix-server:0.3.1
+    image: ghcr.io/raktim94/rechvix-server:0.4.0
     container_name: rechvix-migrate
     command: ["-migrate"]
     restart: "no"
@@ -99,7 +99,7 @@ services:
       envs: []
 
   app:
-    image: ghcr.io/raktim94/rechvix-server:0.3.1
+    image: ghcr.io/raktim94/rechvix-server:0.4.0
     container_name: rechvix-app
     hostname: rechvix-app
     restart: unless-stopped
@@ -132,7 +132,7 @@ services:
           protocol: tcp
 
   worker:
-    image: ghcr.io/raktim94/rechvix-worker:0.3.1
+    image: ghcr.io/raktim94/rechvix-worker:0.4.0
     container_name: rechvix-worker
     hostname: rechvix-worker
     restart: unless-stopped
@@ -202,10 +202,28 @@ x-casaos:
   index: /
   scheme: http
   port_map: "8090"
-  version: "0.3.1"
-  update_at: "2026-09-07"
+  version: "0.4.0"
+  update_at: "2026-09-08"
   release_notes:
     en_US: |-
+      0.4.0 (2026-09-08):
+      Scan a distributor's purchase bill with your camera and let OCR fill
+      in the purchase for you — it matches the distributor against your
+      existing suppliers (by GSTIN or name) so you don't end up with
+      duplicates, matches each line to a catalogue product, and lets you
+      correct every field (including a negotiated price) before anything
+      is saved. Stock received at a new price now opens its own cost
+      batch instead of being blended away, so margins stay honest.
+
+      Also new: day-to-day expense tracking (rent, electricity, wages),
+      staff attendance with a calendar that also holds your dated tasks,
+      a "Today" summary on the dashboard, a choice of five invoice
+      layouts when printing, quick-add for customers and distributors
+      without leaving the billing screen, WhatsApp sharing straight from
+      the sales list, a show/hide toggle on password fields, and a
+      Ctrl+K command palette. The whole interface has been reworked for
+      counter use.
+
       0.3.1 (2026-09-07):
       Fixed two real bugs found while testing 0.3.0 live: the Unit
       dropdown on the new-product form was always empty (frontend/backend
