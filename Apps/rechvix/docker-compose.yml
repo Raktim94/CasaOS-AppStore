@@ -84,7 +84,7 @@ services:
             en_US: Auto-generated one-time database setup script (creates the app's runtime role) — do not modify.
 
   migrate:
-    image: ghcr.io/raktim94/rechvix-server:0.10.0
+    image: ghcr.io/raktim94/rechvix-server:0.11.0
     container_name: rechvix-migrate
     command: ["-migrate"]
     restart: "no"
@@ -99,7 +99,7 @@ services:
       envs: []
 
   app:
-    image: ghcr.io/raktim94/rechvix-server:0.10.0
+    image: ghcr.io/raktim94/rechvix-server:0.11.0
     container_name: rechvix-app
     hostname: rechvix-app
     restart: unless-stopped
@@ -132,7 +132,7 @@ services:
           protocol: tcp
 
   worker:
-    image: ghcr.io/raktim94/rechvix-worker:0.10.0
+    image: ghcr.io/raktim94/rechvix-worker:0.11.0
     container_name: rechvix-worker
     hostname: rechvix-worker
     restart: unless-stopped
@@ -202,10 +202,17 @@ x-casaos:
   index: /
   scheme: http
   port_map: "8090"
-  version: "0.10.0"
+  version: "0.11.0"
   update_at: "2026-09-08"
   release_notes:
     en_US: |-
+      0.11.0 (2026-09-08):
+      Purchases now compute real GST — a supplier bill correctly splits
+      into taxable value and input tax credit (CGST/SGST or IGST,
+      depending on the supplier's state) when the supplier has a GST
+      registration on file, instead of the whole amount posting as one
+      lump sum. Groundwork for a full GSTR-3B report, coming next.
+
       0.10.0 (2026-09-08):
       Settings now has a Branches & warehouses panel — a business
       running more than one location or stock point can see and add
