@@ -84,7 +84,7 @@ services:
             en_US: Auto-generated one-time database setup script (creates the app's runtime role) — do not modify.
 
   migrate:
-    image: ghcr.io/raktim94/rechvix-server:0.4.0
+    image: ghcr.io/raktim94/rechvix-server:0.5.0
     container_name: rechvix-migrate
     command: ["-migrate"]
     restart: "no"
@@ -99,7 +99,7 @@ services:
       envs: []
 
   app:
-    image: ghcr.io/raktim94/rechvix-server:0.4.0
+    image: ghcr.io/raktim94/rechvix-server:0.5.0
     container_name: rechvix-app
     hostname: rechvix-app
     restart: unless-stopped
@@ -132,7 +132,7 @@ services:
           protocol: tcp
 
   worker:
-    image: ghcr.io/raktim94/rechvix-worker:0.4.0
+    image: ghcr.io/raktim94/rechvix-worker:0.5.0
     container_name: rechvix-worker
     hostname: rechvix-worker
     restart: unless-stopped
@@ -202,10 +202,24 @@ x-casaos:
   index: /
   scheme: http
   port_map: "8090"
-  version: "0.4.0"
+  version: "0.5.0"
   update_at: "2026-09-08"
   release_notes:
     en_US: |-
+      0.5.0 (2026-09-08):
+      Scanning a barcode at the counter now actually finds the product —
+      the billing screen has always said "scan a barcode" but the search
+      behind it only ever matched product names, so a scan silently
+      found nothing; fixed, and a barcode can now be attached right on
+      the product form. A finalized invoice/bill now shows what's
+      actually been paid against it and lets you record a payment there
+      directly, instead of only ever seeing a customer's total on-account
+      balance. New product creation can set opening stock in the same
+      step, instead of failing on the first sale with no clue why. Added
+      a change-password screen. A few pages (Inventory, Accounting) that
+      had no visible way to create anything now do, and the calendar
+      picked up a Google-Calendar-style quick task composer.
+
       0.4.0 (2026-09-08):
       Scan a distributor's purchase bill with your camera and let OCR fill
       in the purchase for you — it matches the distributor against your
