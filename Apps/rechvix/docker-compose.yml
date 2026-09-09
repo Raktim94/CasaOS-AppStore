@@ -70,7 +70,7 @@ services:
             en_US: All business data — invoices, inventory, accounting, everything. Back this up.
 
   migrate:
-    image: ghcr.io/raktim94/rechvix-server:0.14.1
+    image: ghcr.io/raktim94/rechvix-server:0.14.2
     container_name: rechvix-migrate
     command: ["-migrate"]
     restart: "no"
@@ -85,7 +85,7 @@ services:
       envs: []
 
   app:
-    image: ghcr.io/raktim94/rechvix-server:0.14.1
+    image: ghcr.io/raktim94/rechvix-server:0.14.2
     container_name: rechvix-app
     hostname: rechvix-app
     restart: unless-stopped
@@ -118,7 +118,7 @@ services:
           protocol: tcp
 
   worker:
-    image: ghcr.io/raktim94/rechvix-worker:0.14.1
+    image: ghcr.io/raktim94/rechvix-worker:0.14.2
     container_name: rechvix-worker
     hostname: rechvix-worker
     restart: unless-stopped
@@ -188,10 +188,19 @@ x-casaos:
   index: /
   scheme: http
   port_map: "8090"
-  version: "0.14.1"
+  version: "0.14.2"
   update_at: "2026-09-09"
   release_notes:
     en_US: |-
+      0.14.2 (2026-09-09):
+      Billing counter: you can now edit a line's quantity or remove it
+      after adding it, instead of the whole sale needing to be
+      abandoned over one mistake. A "Walk-in / Cash sale" button skips
+      picking a customer for a quick retail sale. Scanning a barcode
+      adds the item straight away instead of needing a click. And the
+      running total is now visible while you're still adding items,
+      not just after finalizing.
+
       0.14.1 (2026-09-09):
       A fresh organisation now gets common units of measure (pieces,
       kilogram, litre, box, dozen, and more) automatically instead of
