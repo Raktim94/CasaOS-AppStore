@@ -70,7 +70,7 @@ services:
             en_US: All business data — invoices, inventory, accounting, everything. Back this up.
 
   migrate:
-    image: ghcr.io/raktim94/rechvix-server:0.14.0
+    image: ghcr.io/raktim94/rechvix-server:0.14.1
     container_name: rechvix-migrate
     command: ["-migrate"]
     restart: "no"
@@ -85,7 +85,7 @@ services:
       envs: []
 
   app:
-    image: ghcr.io/raktim94/rechvix-server:0.14.0
+    image: ghcr.io/raktim94/rechvix-server:0.14.1
     container_name: rechvix-app
     hostname: rechvix-app
     restart: unless-stopped
@@ -118,7 +118,7 @@ services:
           protocol: tcp
 
   worker:
-    image: ghcr.io/raktim94/rechvix-worker:0.14.0
+    image: ghcr.io/raktim94/rechvix-worker:0.14.1
     container_name: rechvix-worker
     hostname: rechvix-worker
     restart: unless-stopped
@@ -188,10 +188,19 @@ x-casaos:
   index: /
   scheme: http
   port_map: "8090"
-  version: "0.14.0"
+  version: "0.14.1"
   update_at: "2026-09-09"
   release_notes:
     en_US: |-
+      0.14.1 (2026-09-09):
+      A fresh organisation now gets common units of measure (pieces,
+      kilogram, litre, box, dozen, and more) automatically instead of
+      needing one added by hand before you can create a product or
+      bulk-import a CSV. Bulk product CSV import also now accepts
+      price and gst_rate columns, so an imported product is actually
+      sellable right away instead of needing a separate visit to
+      Pricing and GST for every row.
+
       0.14.0 (2026-09-09):
       Sales: convert a finalized quotation straight into a sales order
       or invoice (and an order into an invoice) without re-entering
