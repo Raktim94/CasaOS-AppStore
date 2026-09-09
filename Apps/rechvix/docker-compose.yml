@@ -108,7 +108,7 @@ services:
   # covers waiting on /secrets/env below: `test -s` fails (non-zero exit)
   # until postgres has generated it, and on-failure just retries.
   migrate:
-    image: ghcr.io/raktim94/rechvix-server:0.14.3
+    image: ghcr.io/raktim94/rechvix-server:0.14.4
     container_name: rechvix-migrate
     entrypoint: ["sh", "-c"]
     command:
@@ -131,7 +131,7 @@ services:
       envs: []
 
   app:
-    image: ghcr.io/raktim94/rechvix-server:0.14.3
+    image: ghcr.io/raktim94/rechvix-server:0.14.4
     container_name: rechvix-app
     hostname: rechvix-app
     restart: unless-stopped
@@ -175,7 +175,7 @@ services:
           protocol: tcp
 
   worker:
-    image: ghcr.io/raktim94/rechvix-worker:0.14.3
+    image: ghcr.io/raktim94/rechvix-worker:0.14.4
     container_name: rechvix-worker
     hostname: rechvix-worker
     restart: unless-stopped
@@ -255,10 +255,19 @@ x-casaos:
   index: /
   scheme: http
   port_map: "8090"
-  version: "0.14.7"
+  version: "0.14.8"
   update_at: "2026-09-10"
   release_notes:
     en_US: |-
+      0.14.8 (2026-09-10):
+      A real design pass on the app itself: a dark navigation rail (was
+      plain white), Add sale/Add purchase always one tap away instead
+      of buried in a menu, and the billing screen is now a proper
+      invoice grid showing item names (it used to show only the tax
+      code) with the running total always visible while you build a
+      sale. Dark mode also had a rendering bug where the sidebar was
+      nearly invisible against the page — fixed.
+
       0.14.7 (2026-09-10):
       Fixed 0.14.6's own fix: the auto-generated-secrets script worked
       on a genuinely fresh install but broke Postgres on an update of an
