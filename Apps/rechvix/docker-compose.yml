@@ -70,7 +70,7 @@ services:
             en_US: All business data — invoices, inventory, accounting, everything. Back this up.
 
   migrate:
-    image: ghcr.io/raktim94/rechvix-server:0.12.0
+    image: ghcr.io/raktim94/rechvix-server:0.14.0
     container_name: rechvix-migrate
     command: ["-migrate"]
     restart: "no"
@@ -85,7 +85,7 @@ services:
       envs: []
 
   app:
-    image: ghcr.io/raktim94/rechvix-server:0.12.0
+    image: ghcr.io/raktim94/rechvix-server:0.14.0
     container_name: rechvix-app
     hostname: rechvix-app
     restart: unless-stopped
@@ -118,7 +118,7 @@ services:
           protocol: tcp
 
   worker:
-    image: ghcr.io/raktim94/rechvix-worker:0.12.0
+    image: ghcr.io/raktim94/rechvix-worker:0.14.0
     container_name: rechvix-worker
     hostname: rechvix-worker
     restart: unless-stopped
@@ -188,10 +188,34 @@ x-casaos:
   index: /
   scheme: http
   port_map: "8090"
-  version: "0.13.0"
-  update_at: "2026-09-08"
+  version: "0.14.0"
+  update_at: "2026-09-09"
   release_notes:
     en_US: |-
+      0.14.0 (2026-09-09):
+      Sales: convert a finalized quotation straight into a sales order
+      or invoice (and an order into an invoice) without re-entering
+      every line by hand, plus quick filters to find open quotations/
+      orders on the Sales list.
+      Catalogue: edit and delete products (soft-delete, so history
+      stays intact), multi-select bulk delete, and a downloadable
+      sample CSV for bulk import.
+      GST/Tax: a configurable e-Way Bill value threshold, overriding
+      the national default per business.
+      Invoices: 5 selectable visual designs (Classic/Modern/Minimal/
+      Bold/Elegant) for printed invoices, independent of paper size.
+      Expenses: an "Other" category for anything that doesn't fit a
+      real account, and attach a receipt/bill photo or PDF to any
+      expense entry.
+      Purchases/Inventory: scanning a distributor bill can now create
+      a missing product inline instead of blocking on it, plus a new
+      no-API-key way to use an AI chat tool you already have (ChatGPT,
+      Gemini, ...) to read a messy bill instead of the built-in
+      scanner.
+      Fixed: signing out, or a session timing out, now actually
+      returns you to the sign-in screen immediately instead of
+      silently leaving you on a broken page until your next click.
+
       0.13.0 (2026-09-08):
       Fixed a real fresh-install bug: on a brand-new install, Postgres
       could get stuck and never start at all, leaving the app looking
