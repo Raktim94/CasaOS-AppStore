@@ -17,6 +17,23 @@ services:
   # would make stored integration credentials unrecoverable (AEAD key) and
   # orphan the existing database role passwords, same risk as losing the
   # database volume itself.
+  #
+  # $$$$ (four dollar signs), not $$, on every bareword shell variable below
+  # (e.g. $$$$SECRETS_FILE, $$$$BILLING_APP_PASSWORD) — confirmed against a
+  # live install that casaos-cli's install/apply path runs compose variable
+  # interpolation TWICE before creating containers, not once like plain
+  # `docker compose`. A single $$ (correct for plain `docker compose`, and
+  # what this file used at first) survives CasaOS's first pass as a properly
+  # escaped literal `$IDENT`, but the second pass then treats that bare
+  # `$IDENT` as a real (undefined) variable and deletes it — confirmed via
+  # `docker inspect` on the actually-created container showing e.g.
+  # `if [ ! -s "" ]; then` where `"$$SECRETS_FILE"` should have been. Command
+  # substitutions like $$(mktemp ...) are unaffected and correctly need only
+  # $$ — the parenthesis doesn't match a variable-name pattern, so CasaOS's
+  # extra second pass leaves already-collapsed `$(...)` alone. Verified this
+  # exact four-dollar fix against a real casaos-cli install: `docker inspect`
+  # on the resulting container showed correct `$SECRETS_FILE`/etc. reaching
+  # the shell, and the app came up healthy.
   postgres:
     image: postgres:18
     container_name: rechvix-postgres
@@ -29,21 +46,21 @@ services:
         umask 022
         mkdir -p /secrets
         SECRETS_FILE=/secrets/env
-        if [ ! -s "$$SECRETS_FILE" ]; then
+        if [ ! -s "$$$$SECRETS_FILE" ]; then
           tmp="$$(mktemp /secrets/.env.XXXXXX)"
           {
             echo "POSTGRES_PASSWORD=$$(head -c48 /dev/urandom | base64 | tr -dc 'A-Za-z0-9' | head -c24)"
             echo "BILLING_APP_PASSWORD=$$(head -c48 /dev/urandom | base64 | tr -dc 'A-Za-z0-9' | head -c24)"
             echo "AEAD_ENCRYPTION_KEY=$$(head -c32 /dev/urandom | base64)"
-          } > "$$tmp"
-          chmod 644 "$$tmp"
-          mv "$$tmp" "$$SECRETS_FILE"
+          } > "$$$$tmp"
+          chmod 644 "$$$$tmp"
+          mv "$$$$tmp" "$$$$SECRETS_FILE"
         fi
-        . "$$SECRETS_FILE"
+        . "$$$$SECRETS_FILE"
         export POSTGRES_PASSWORD
         mkdir -p /docker-entrypoint-initdb.d
         cat > /docker-entrypoint-initdb.d/01-create-runtime-role.sql <<SQL
-        SELECT 'CREATE ROLE billing_app LOGIN PASSWORD ''$$BILLING_APP_PASSWORD'''
+        SELECT 'CREATE ROLE billing_app LOGIN PASSWORD ''$$$$BILLING_APP_PASSWORD'''
         WHERE NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'billing_app')
         \gexec
         SQL
@@ -94,7 +111,7 @@ services:
         set -e
         test -s /secrets/env
         . /secrets/env
-        export DATABASE_DSN="postgres://billing_migrator:$$POSTGRES_PASSWORD@rechvix-postgres:5432/billing?sslmode=disable"
+        export DATABASE_DSN="postgres://billing_migrator:$$$$POSTGRES_PASSWORD@rechvix-postgres:5432/billing?sslmode=disable"
         exec /app/server -migrate
     restart: on-failure
     depends_on:
@@ -123,13 +140,13 @@ services:
         set -e
         test -s /secrets/env
         . /secrets/env
-        export DATABASE_DSN="postgres://billing_app:$$BILLING_APP_PASSWORD@rechvix-postgres:5432/billing?sslmode=disable"
+        export DATABASE_DSN="postgres://billing_app:$$$$BILLING_APP_PASSWORD@rechvix-postgres:5432/billing?sslmode=disable"
         # billing_migrator (RLS-bypassing), NOT billing_app — see
         # deploy/compose/docker-compose.yml's identical line for why
         # backup/restore needs this and reuses the same role the migrate
         # service above connects as.
-        export BACKUP_DATABASE_DSN="postgres://billing_migrator:$$POSTGRES_PASSWORD@rechvix-postgres:5432/billing?sslmode=disable"
-        export AEAD_ENCRYPTION_KEY="$$AEAD_ENCRYPTION_KEY"
+        export BACKUP_DATABASE_DSN="postgres://billing_migrator:$$$$POSTGRES_PASSWORD@rechvix-postgres:5432/billing?sslmode=disable"
+        export AEAD_ENCRYPTION_KEY="$$$$AEAD_ENCRYPTION_KEY"
         exec /app/server
     environment:
       HTTP_PORT: "8080"
@@ -168,8 +185,8 @@ services:
         set -e
         test -s /secrets/env
         . /secrets/env
-        export DATABASE_DSN="postgres://billing_app:$$BILLING_APP_PASSWORD@rechvix-postgres:5432/billing?sslmode=disable"
-        export AEAD_ENCRYPTION_KEY="$$AEAD_ENCRYPTION_KEY"
+        export DATABASE_DSN="postgres://billing_app:$$$$BILLING_APP_PASSWORD@rechvix-postgres:5432/billing?sslmode=disable"
+        export AEAD_ENCRYPTION_KEY="$$$$AEAD_ENCRYPTION_KEY"
         exec /app/worker
     environment:
       EINVOICE_PROVIDER: "mock"
@@ -236,10 +253,18 @@ x-casaos:
   index: /
   scheme: http
   port_map: "8090"
-  version: "0.14.4"
+  version: "0.14.5"
   update_at: "2026-09-09"
   release_notes:
     en_US: |-
+      0.14.5 (2026-09-09):
+      Fixed the fix: 0.14.4's auto-generated secrets were silently wiped
+      to blank by a CasaOS-specific quirk (it evaluates variable
+      substitution twice during install, not once), reintroducing the
+      exact "Postgres won't start" failure it was meant to solve. Verified
+      against a real install this time — Postgres, migrations, the app,
+      and the background worker all come up healthy with no input needed.
+
       0.14.4 (2026-09-09):
       Fixed a real fresh-install bug: a "clean" install was found reusing
       stale cached values from a previous, unrelated install and leaving
