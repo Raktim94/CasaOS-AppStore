@@ -18,22 +18,30 @@ services:
   # orphan the existing database role passwords, same risk as losing the
   # database volume itself.
   #
-  # $$$$ (four dollar signs), not $$, on every bareword shell variable below
-  # (e.g. $$$$SECRETS_FILE, $$$$BILLING_APP_PASSWORD) — confirmed against a
-  # live install that casaos-cli's install/apply path runs compose variable
-  # interpolation TWICE before creating containers, not once like plain
-  # `docker compose`. A single $$ (correct for plain `docker compose`, and
-  # what this file used at first) survives CasaOS's first pass as a properly
-  # escaped literal `$IDENT`, but the second pass then treats that bare
-  # `$IDENT` as a real (undefined) variable and deletes it — confirmed via
-  # `docker inspect` on the actually-created container showing e.g.
-  # `if [ ! -s "" ]; then` where `"$$SECRETS_FILE"` should have been. Command
-  # substitutions like $$(mktemp ...) are unaffected and correctly need only
-  # $$ — the parenthesis doesn't match a variable-name pattern, so CasaOS's
-  # extra second pass leaves already-collapsed `$(...)` alone. Verified this
-  # exact four-dollar fix against a real casaos-cli install: `docker inspect`
-  # on the resulting container showed correct `$SECRETS_FILE`/etc. reaching
-  # the shell, and the app came up healthy.
+  # No BAREWORD `$IDENT` shell-variable reference anywhere below (e.g. no
+  # `$SECRETS_FILE`, no `. /secrets/env` followed by `$POSTGRES_PASSWORD`)
+  # — only literal paths and `$(...)` command substitutions. This is the
+  # second attempt at working around CasaOS's compose variable
+  # interpolation, and the first attempt's fix ($$$$, four dollar signs,
+  # to survive what looked like a consistent double interpolation pass)
+  # turned out to be wrong in a worse way: `casaos-cli app-management
+  # install` (a genuinely fresh install) really does interpolate twice,
+  # but `casaos-cli app-management apply` (updating an already-installed
+  # app — what every subsequent version update actually runs) only
+  # interpolates ONCE. $$$$ is correct for the former and wrong for the
+  # latter: one pass collapses it to literal `$$IDENT`, which the SHELL
+  # then reads as `$$` (its own PID) followed by literal text `IDENT` —
+  # confirmed via `docker inspect` on a real `apply`-updated container
+  # showing `. "1SECRETS_FILE"` (PID 1) where `. "$SECRETS_FILE"` should
+  # have been, crashing postgres. There is no single dollar-count that
+  # survives both `install` and `apply` correctly, because they don't
+  # agree on how many passes to run — so this avoids the question
+  # entirely: `$(...)` command substitutions are unaffected by EITHER
+  # pass count (confirmed via `docker inspect` under both install and
+  # apply — the parenthesis never matches compose's variable-name
+  # pattern, so nothing to interpolate), so every dynamic value below is
+  # read via `$(sed ... /secrets/env)` at the point of use instead of
+  # being sourced into a named shell variable and referenced bare.
   postgres:
     image: postgres:18
     container_name: rechvix-postgres
@@ -45,25 +53,22 @@ services:
         set -e
         umask 022
         mkdir -p /secrets
-        SECRETS_FILE=/secrets/env
-        if [ ! -s "$$$$SECRETS_FILE" ]; then
-          tmp="$$(mktemp /secrets/.env.XXXXXX)"
+        if [ ! -s /secrets/env ]; then
           {
             echo "POSTGRES_PASSWORD=$$(head -c48 /dev/urandom | base64 | tr -dc 'A-Za-z0-9' | head -c24)"
             echo "BILLING_APP_PASSWORD=$$(head -c48 /dev/urandom | base64 | tr -dc 'A-Za-z0-9' | head -c24)"
             echo "AEAD_ENCRYPTION_KEY=$$(head -c32 /dev/urandom | base64)"
-          } > "$$$$tmp"
-          chmod 644 "$$$$tmp"
-          mv "$$$$tmp" "$$$$SECRETS_FILE"
+          } > /secrets/.env.new
+          chmod 644 /secrets/.env.new
+          mv /secrets/.env.new /secrets/env
         fi
-        . "$$$$SECRETS_FILE"
-        export POSTGRES_PASSWORD
         mkdir -p /docker-entrypoint-initdb.d
         cat > /docker-entrypoint-initdb.d/01-create-runtime-role.sql <<SQL
-        SELECT 'CREATE ROLE billing_app LOGIN PASSWORD ''$$$$BILLING_APP_PASSWORD'''
+        SELECT 'CREATE ROLE billing_app LOGIN PASSWORD ''$$(sed -n 's/^BILLING_APP_PASSWORD=//p' /secrets/env)'''
         WHERE NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'billing_app')
         \gexec
         SQL
+        export POSTGRES_PASSWORD="$$(sed -n 's/^POSTGRES_PASSWORD=//p' /secrets/env)"
         exec docker-entrypoint.sh postgres
     environment:
       POSTGRES_DB: billing
@@ -110,8 +115,7 @@ services:
       - |
         set -e
         test -s /secrets/env
-        . /secrets/env
-        export DATABASE_DSN="postgres://billing_migrator:$$$$POSTGRES_PASSWORD@rechvix-postgres:5432/billing?sslmode=disable"
+        export DATABASE_DSN="postgres://billing_migrator:$$(sed -n 's/^POSTGRES_PASSWORD=//p' /secrets/env)@rechvix-postgres:5432/billing?sslmode=disable"
         exec /app/server -migrate
     restart: on-failure
     depends_on:
@@ -139,14 +143,13 @@ services:
       - |
         set -e
         test -s /secrets/env
-        . /secrets/env
-        export DATABASE_DSN="postgres://billing_app:$$$$BILLING_APP_PASSWORD@rechvix-postgres:5432/billing?sslmode=disable"
+        export DATABASE_DSN="postgres://billing_app:$$(sed -n 's/^BILLING_APP_PASSWORD=//p' /secrets/env)@rechvix-postgres:5432/billing?sslmode=disable"
         # billing_migrator (RLS-bypassing), NOT billing_app — see
         # deploy/compose/docker-compose.yml's identical line for why
         # backup/restore needs this and reuses the same role the migrate
         # service above connects as.
-        export BACKUP_DATABASE_DSN="postgres://billing_migrator:$$$$POSTGRES_PASSWORD@rechvix-postgres:5432/billing?sslmode=disable"
-        export AEAD_ENCRYPTION_KEY="$$$$AEAD_ENCRYPTION_KEY"
+        export BACKUP_DATABASE_DSN="postgres://billing_migrator:$$(sed -n 's/^POSTGRES_PASSWORD=//p' /secrets/env)@rechvix-postgres:5432/billing?sslmode=disable"
+        export AEAD_ENCRYPTION_KEY="$$(sed -n 's/^AEAD_ENCRYPTION_KEY=//p' /secrets/env)"
         exec /app/server
     environment:
       HTTP_PORT: "8080"
@@ -184,9 +187,8 @@ services:
       - |
         set -e
         test -s /secrets/env
-        . /secrets/env
-        export DATABASE_DSN="postgres://billing_app:$$$$BILLING_APP_PASSWORD@rechvix-postgres:5432/billing?sslmode=disable"
-        export AEAD_ENCRYPTION_KEY="$$$$AEAD_ENCRYPTION_KEY"
+        export DATABASE_DSN="postgres://billing_app:$$(sed -n 's/^BILLING_APP_PASSWORD=//p' /secrets/env)@rechvix-postgres:5432/billing?sslmode=disable"
+        export AEAD_ENCRYPTION_KEY="$$(sed -n 's/^AEAD_ENCRYPTION_KEY=//p' /secrets/env)"
         exec /app/worker
     environment:
       EINVOICE_PROVIDER: "mock"
@@ -253,10 +255,18 @@ x-casaos:
   index: /
   scheme: http
   port_map: "8090"
-  version: "0.14.6"
+  version: "0.14.7"
   update_at: "2026-09-10"
   release_notes:
     en_US: |-
+      0.14.7 (2026-09-10):
+      Fixed 0.14.6's own fix: the auto-generated-secrets script worked
+      on a genuinely fresh install but broke Postgres on an update of an
+      already-installed copy, because CasaOS runs a different number of
+      variable-substitution passes for "install" than for "update" —
+      the script now avoids relying on that count matching at all.
+      Verified against a real update on the box this was found on.
+
       0.14.6 (2026-09-10):
       Billing screen: line-level discounts can now be edited directly in
       the items table, instead of needing the line deleted and re-added
