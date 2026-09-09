@@ -103,7 +103,7 @@ services:
   # covers waiting on /secrets/env below: `test -s` fails (non-zero exit)
   # until postgres has generated it, and on-failure just retries.
   migrate:
-    image: ghcr.io/raktim94/rechvix-server:0.14.2
+    image: ghcr.io/raktim94/rechvix-server:0.14.3
     container_name: rechvix-migrate
     entrypoint: ["sh", "-c"]
     command:
@@ -127,7 +127,7 @@ services:
       envs: []
 
   app:
-    image: ghcr.io/raktim94/rechvix-server:0.14.2
+    image: ghcr.io/raktim94/rechvix-server:0.14.3
     container_name: rechvix-app
     hostname: rechvix-app
     restart: unless-stopped
@@ -172,7 +172,7 @@ services:
           protocol: tcp
 
   worker:
-    image: ghcr.io/raktim94/rechvix-worker:0.14.2
+    image: ghcr.io/raktim94/rechvix-worker:0.14.3
     container_name: rechvix-worker
     hostname: rechvix-worker
     restart: unless-stopped
@@ -253,10 +253,18 @@ x-casaos:
   index: /
   scheme: http
   port_map: "8090"
-  version: "0.14.5"
-  update_at: "2026-09-09"
+  version: "0.14.6"
+  update_at: "2026-09-10"
   release_notes:
     en_US: |-
+      0.14.6 (2026-09-10):
+      Billing screen: line-level discounts can now be edited directly in
+      the items table, instead of needing the line deleted and re-added
+      at a lower price. Product search results now show stock and price
+      in aligned columns with a low/out-of-stock warning, and the
+      running total is easier to read at a glance. Contacts list now
+      shows each customer's outstanding balance right in the list.
+
       0.14.5 (2026-09-09):
       Fixed the fix: 0.14.4's auto-generated secrets were silently wiped
       to blank by a CasaOS-specific quirk (it evaluates variable
