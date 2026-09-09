@@ -69,11 +69,19 @@ services:
           description:
             en_US: All business data — invoices, inventory, accounting, everything. Back this up.
 
+  # restart: on-failure (not "no") because CasaOS's install path does not
+  # honor the depends_on/condition below — it starts every container at
+  # once, so on a fresh box this reliably hits postgres before it's ready
+  # and exits once. With restart: "no" that was permanent: migrate never
+  # ran again, the schema was never created, and app/worker crash-looped
+  # forever waiting on tables that don't exist. on-failure (unlimited)
+  # makes migrate keep retrying with Docker's own backoff until postgres
+  # is actually ready, then it exits 0 and stays stopped.
   migrate:
     image: ghcr.io/raktim94/rechvix-server:0.14.2
     container_name: rechvix-migrate
     command: ["-migrate"]
-    restart: "no"
+    restart: on-failure
     depends_on:
       postgres:
         condition: service_healthy
@@ -188,10 +196,19 @@ x-casaos:
   index: /
   scheme: http
   port_map: "8090"
-  version: "0.14.2"
+  version: "0.14.3"
   update_at: "2026-09-09"
   release_notes:
     en_US: |-
+      0.14.3 (2026-09-09):
+      Fixed a real fresh-install bug: CasaOS's installer starts every
+      container at once rather than waiting for Postgres to be ready, so
+      the one-time database-setup step could lose that race, fail once,
+      and never run again — leaving the app permanently unable to start
+      on a brand-new install. That step now retries automatically until
+      Postgres is actually ready. No change for an existing, already-
+      running install.
+
       0.14.2 (2026-09-09):
       Billing counter: you can now edit a line's quantity or remove it
       after adding it, instead of the whole sale needing to be
