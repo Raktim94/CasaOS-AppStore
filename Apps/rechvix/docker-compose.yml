@@ -108,7 +108,7 @@ services:
   # covers waiting on /secrets/env below: `test -s` fails (non-zero exit)
   # until postgres has generated it, and on-failure just retries.
   migrate:
-    image: ghcr.io/raktim94/rechvix-server:0.14.4
+    image: ghcr.io/raktim94/rechvix-server:0.14.5
     container_name: rechvix-migrate
     entrypoint: ["sh", "-c"]
     command:
@@ -131,7 +131,7 @@ services:
       envs: []
 
   app:
-    image: ghcr.io/raktim94/rechvix-server:0.14.4
+    image: ghcr.io/raktim94/rechvix-server:0.14.5
     container_name: rechvix-app
     hostname: rechvix-app
     restart: unless-stopped
@@ -175,7 +175,7 @@ services:
           protocol: tcp
 
   worker:
-    image: ghcr.io/raktim94/rechvix-worker:0.14.4
+    image: ghcr.io/raktim94/rechvix-worker:0.14.5
     container_name: rechvix-worker
     hostname: rechvix-worker
     restart: unless-stopped
@@ -255,10 +255,19 @@ x-casaos:
   index: /
   scheme: http
   port_map: "8090"
-  version: "0.14.8"
+  version: "0.14.9"
   update_at: "2026-09-10"
   release_notes:
     en_US: |-
+      0.14.9 (2026-09-10):
+      Bulk product import (CSV/Excel) now covers category, brand, and
+      barcode, not just name/HSN/unit/SKU/price/tax — a category or
+      brand named in the file is created automatically the first time
+      it's seen, and a barcode is checked for uniqueness both against
+      your existing catalogue and other rows in the same file. Opening
+      stock is still set afterward on the Inventory page, same as
+      before.
+
       0.14.8 (2026-09-10):
       A real design pass on the app itself: a dark navigation rail (was
       plain white), Add sale/Add purchase always one tap away instead
