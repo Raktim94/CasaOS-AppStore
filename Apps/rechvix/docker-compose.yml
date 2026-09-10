@@ -108,7 +108,7 @@ services:
   # covers waiting on /secrets/env below: `test -s` fails (non-zero exit)
   # until postgres has generated it, and on-failure just retries.
   migrate:
-    image: ghcr.io/raktim94/rechvix-server:0.14.6
+    image: ghcr.io/raktim94/rechvix-server:0.14.7
     container_name: rechvix-migrate
     entrypoint: ["sh", "-c"]
     command:
@@ -131,7 +131,7 @@ services:
       envs: []
 
   app:
-    image: ghcr.io/raktim94/rechvix-server:0.14.6
+    image: ghcr.io/raktim94/rechvix-server:0.14.7
     container_name: rechvix-app
     hostname: rechvix-app
     restart: unless-stopped
@@ -175,7 +175,7 @@ services:
           protocol: tcp
 
   worker:
-    image: ghcr.io/raktim94/rechvix-worker:0.14.6
+    image: ghcr.io/raktim94/rechvix-worker:0.14.7
     container_name: rechvix-worker
     hostname: rechvix-worker
     restart: unless-stopped
@@ -255,10 +255,19 @@ x-casaos:
   index: /
   scheme: http
   port_map: "8090"
-  version: "0.14.10"
+  version: "0.14.11"
   update_at: "2026-09-10"
   release_notes:
     en_US: |-
+      0.14.11 (2026-09-10):
+      Products now have one price, set directly on the product form (the
+      separate Pricing page is gone) — CSV import and manual entry both
+      work with zero setup, fixing prices silently not saving on a fresh
+      install. "Delete" (single or bulk) now actually removes a product
+      completely when it's never been sold or purchased; a product with
+      real history is deactivated instead, and a bulk "Active" button
+      restores it.
+
       0.14.10 (2026-09-10):
       Multiple companies, each with its own GST registration, in one
       install: a company switcher (top bar) to create and pick the
