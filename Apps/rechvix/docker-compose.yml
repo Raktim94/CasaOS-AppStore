@@ -108,7 +108,7 @@ services:
   # covers waiting on /secrets/env below: `test -s` fails (non-zero exit)
   # until postgres has generated it, and on-failure just retries.
   migrate:
-    image: ghcr.io/raktim94/rechvix-server:0.14.5
+    image: ghcr.io/raktim94/rechvix-server:0.14.6
     container_name: rechvix-migrate
     entrypoint: ["sh", "-c"]
     command:
@@ -131,7 +131,7 @@ services:
       envs: []
 
   app:
-    image: ghcr.io/raktim94/rechvix-server:0.14.5
+    image: ghcr.io/raktim94/rechvix-server:0.14.6
     container_name: rechvix-app
     hostname: rechvix-app
     restart: unless-stopped
@@ -175,7 +175,7 @@ services:
           protocol: tcp
 
   worker:
-    image: ghcr.io/raktim94/rechvix-worker:0.14.5
+    image: ghcr.io/raktim94/rechvix-worker:0.14.6
     container_name: rechvix-worker
     hostname: rechvix-worker
     restart: unless-stopped
@@ -255,10 +255,20 @@ x-casaos:
   index: /
   scheme: http
   port_map: "8090"
-  version: "0.14.9"
+  version: "0.14.10"
   update_at: "2026-09-10"
   release_notes:
     en_US: |-
+      0.14.10 (2026-09-10):
+      Multiple companies, each with its own GST registration, in one
+      install: a company switcher (top bar) to create and pick the
+      active one, with Sales, Purchases, GST/GSTR-1/GSTR-3B, Inventory,
+      and Reports all filtering to whichever company is selected. Team
+      members can now be restricted to specific companies from Settings
+      > Team — a restricted member sees and works only within their
+      granted companies (view, create, finalize sales, edit drafts,
+      adjust and transfer stock), never another company's data.
+
       0.14.9 (2026-09-10):
       Bulk product import (CSV/Excel) now covers category, brand, and
       barcode, not just name/HSN/unit/SKU/price/tax — a category or
