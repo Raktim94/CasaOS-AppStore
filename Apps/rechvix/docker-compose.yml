@@ -108,7 +108,7 @@ services:
   # covers waiting on /secrets/env below: `test -s` fails (non-zero exit)
   # until postgres has generated it, and on-failure just retries.
   migrate:
-    image: ghcr.io/raktim94/rechvix-server:0.14.13
+    image: ghcr.io/raktim94/rechvix-server:0.14.14
     container_name: rechvix-migrate
     entrypoint: ["sh", "-c"]
     command:
@@ -131,7 +131,7 @@ services:
       envs: []
 
   app:
-    image: ghcr.io/raktim94/rechvix-server:0.14.13
+    image: ghcr.io/raktim94/rechvix-server:0.14.14
     container_name: rechvix-app
     hostname: rechvix-app
     restart: unless-stopped
@@ -175,7 +175,7 @@ services:
           protocol: tcp
 
   worker:
-    image: ghcr.io/raktim94/rechvix-worker:0.14.13
+    image: ghcr.io/raktim94/rechvix-worker:0.14.14
     container_name: rechvix-worker
     hostname: rechvix-worker
     restart: unless-stopped
@@ -255,10 +255,17 @@ x-casaos:
   index: /
   scheme: http
   port_map: "8090"
-  version: "0.14.13"
+  version: "0.14.14"
   update_at: "2026-09-11"
   release_notes:
     en_US: |-
+      0.14.14 (2026-09-11):
+      The New Sale product search now works without typing anything —
+      it shows a scrollable, alphabetical list of your whole active
+      catalogue the moment a sale starts, and narrows as you type. Meant
+      for shops with a large catalogue where staff can't rely on
+      remembering exact product names.
+
       0.14.13 (2026-09-11):
       Fixed the New Sale screen: the document type, customer search, and
       Start Sale controls could overlap each other instead of sitting in
