@@ -108,7 +108,7 @@ services:
   # covers waiting on /secrets/env below: `test -s` fails (non-zero exit)
   # until postgres has generated it, and on-failure just retries.
   migrate:
-    image: ghcr.io/raktim94/rechvix-server:0.14.8
+    image: ghcr.io/raktim94/rechvix-server:0.14.13
     container_name: rechvix-migrate
     entrypoint: ["sh", "-c"]
     command:
@@ -131,7 +131,7 @@ services:
       envs: []
 
   app:
-    image: ghcr.io/raktim94/rechvix-server:0.14.8
+    image: ghcr.io/raktim94/rechvix-server:0.14.13
     container_name: rechvix-app
     hostname: rechvix-app
     restart: unless-stopped
@@ -175,7 +175,7 @@ services:
           protocol: tcp
 
   worker:
-    image: ghcr.io/raktim94/rechvix-worker:0.14.8
+    image: ghcr.io/raktim94/rechvix-worker:0.14.13
     container_name: rechvix-worker
     hostname: rechvix-worker
     restart: unless-stopped
@@ -255,10 +255,17 @@ x-casaos:
   index: /
   scheme: http
   port_map: "8090"
-  version: "0.14.12"
-  update_at: "2026-09-10"
+  version: "0.14.13"
+  update_at: "2026-09-11"
   release_notes:
     en_US: |-
+      0.14.13 (2026-09-11):
+      Fixed the New Sale screen: the document type, customer search, and
+      Start Sale controls could overlap each other instead of sitting in
+      their own space. Also darkened the light-theme status badge colors
+      (paid/overdue/low-stock) for better readability on counter tablets,
+      and gave report charts a consistent, colorblind-friendly color set.
+
       0.14.12 (2026-09-10):
       Fixed a crash: deleting products where every one landed in the same
       outcome (all fully removed, or all deactivated because they had
