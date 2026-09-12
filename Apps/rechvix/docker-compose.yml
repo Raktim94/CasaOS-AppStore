@@ -108,7 +108,7 @@ services:
   # covers waiting on /secrets/env below: `test -s` fails (non-zero exit)
   # until postgres has generated it, and on-failure just retries.
   migrate:
-    image: ghcr.io/raktim94/rechvix-server:0.14.14
+    image: ghcr.io/raktim94/rechvix-server:0.14.15
     container_name: rechvix-migrate
     entrypoint: ["sh", "-c"]
     command:
@@ -131,7 +131,7 @@ services:
       envs: []
 
   app:
-    image: ghcr.io/raktim94/rechvix-server:0.14.14
+    image: ghcr.io/raktim94/rechvix-server:0.14.15
     container_name: rechvix-app
     hostname: rechvix-app
     restart: unless-stopped
@@ -175,7 +175,7 @@ services:
           protocol: tcp
 
   worker:
-    image: ghcr.io/raktim94/rechvix-worker:0.14.14
+    image: ghcr.io/raktim94/rechvix-worker:0.14.15
     container_name: rechvix-worker
     hostname: rechvix-worker
     restart: unless-stopped
@@ -255,10 +255,22 @@ x-casaos:
   index: /
   scheme: http
   port_map: "8090"
-  version: "0.14.14"
-  update_at: "2026-09-11"
+  version: "0.14.15"
+  update_at: "2026-09-12"
   release_notes:
     en_US: |-
+      0.14.15 (2026-09-12):
+      The Inventory tab now explains how to add stock before you've
+      searched for a product, instead of showing nothing until you do.
+      Bulk CSV import can now set opening stock directly (opening_qty/
+      opening_cost columns) rather than needing a separate trip to
+      Inventory afterward. Editing a product now lets you adjust its
+      stock right there on the same form. The billing screen shows each
+      item's GST% while you're building a sale, not just after
+      finalizing. The Finalize button no longer promises an e-Way Bill
+      step for every sale — that only becomes relevant once a sale
+      actually crosses the government's threshold.
+
       0.14.14 (2026-09-11):
       The New Sale product search now works without typing anything —
       it shows a scrollable, alphabetical list of your whole active
